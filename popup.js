@@ -91,20 +91,23 @@ function updateResults(results) {
 
 function runProcess() {
   chrome.tabs.sendMessage(tabId, { command: "analyze" }, function(response) {
-    renderStatus("Found " + response.imageUrls.length + " images");
+    // Remove "ghost" images
+    var imageUrls = response.imageUrls.filter(function(url) {
+      return url.indexOf("ghost_person") == -1;
+    });
+
+    renderStatus("Found " + imageUrls.length + " images");
 
     // Request one at a time
-    var promise = analyzeImage(response.imageUrls[0]);
-    for(var i = 1; i < response.imageUrls.length; i++) {
+    var promise = analyzeImage(imageUrls[0]);
+    for(var i = 1; i < imageUrls.length; i++) {
       (function(i) {
-        // TODO: avoid "ghost" images
-
         promise = promise.then(function(results) { 
           updateResults(results);
           renderResults();
-          renderStatus("analyzing image " + i + " of " + response.imageUrls.length);
-          changeImage(response.imageUrls[i]);
-          return analyzeImage(response.imageUrls[i])
+          renderStatus("analyzing image " + i + " of " + imageUrls.length);
+          changeImage(imageUrls[i]);
+          return analyzeImage(imageUrls[i])
         });
       })(i);
     }
