@@ -69,9 +69,13 @@ var currentResults = {
   male: 0,
   female: 0,
   total: 0
-}
+};
+
+var tabId = null;
+
 
 function analyzeImage(imageUrl) {
+  // TODO: convert thumbnail to full image
   var faceDetectUrl = "https://apius.faceplusplus.com/v2/detection/detect?api_key=" + API_KEY + "&api_secret=" + API_SECRET + "&url=" + imageUrl;
   return $.getJSON(faceDetectUrl);
 }
@@ -85,14 +89,16 @@ function updateResults(results) {
   else currentResults.female++;
 }
 
-chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-  chrome.tabs.sendMessage(tabs[0].id, { command: "analyze" }, function(response) {
+function runProcess() {
+  chrome.tabs.sendMessage(tabId, { command: "analyze" }, function(response) {
     renderStatus("Found " + response.imageUrls.length + " images");
 
     // Request one at a time
     var promise = analyzeImage(response.imageUrls[0]);
     for(var i = 1; i < response.imageUrls.length; i++) {
       (function(i) {
+        // TODO: avoid "ghost" images
+
         promise = promise.then(function(results) { 
           updateResults(results);
           renderResults();
@@ -108,8 +114,24 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
       updateResults(results);
       renderResults();
       changeImage("");
-      renderStatus("Done with page");
+
+      if(response.nextPageLink) {
+        renderStatus("Next page...");
+        chrome.tabs.sendMessage(tabId, { command: "goto", href: response.nextPageLink });
+      }
     }); 
   });
+}
+
+chrome.runtime.onMessage.addListener(function(request) {
+  if(request.message == "awoke") {
+    runProcess();
+  }
+});
+
+chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+  tabId = tabs[0].id;
+
+  runProcess();
 });
 
