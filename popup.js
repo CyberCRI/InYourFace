@@ -75,8 +75,9 @@ var tabId = null;
 
 
 function analyzeImage(imageUrl) {
-  // TODO: convert thumbnail to full image
-  var faceDetectUrl = "https://apius.faceplusplus.com/v2/detection/detect?api_key=" + API_KEY + "&api_secret=" + API_SECRET + "&url=" + imageUrl;
+  // Get "full image" from thumbnail URL
+  var fullImageUrl = imageUrl.replace("shrink_100_100/", "");
+  var faceDetectUrl = "https://apius.faceplusplus.com/v2/detection/detect?api_key=" + API_KEY + "&api_secret=" + API_SECRET + "&url=" + fullImageUrl;
   return $.getJSON(faceDetectUrl);
 }
 
@@ -105,7 +106,7 @@ function runProcess() {
         promise = promise.then(function(results) { 
           updateResults(results);
           renderResults();
-          renderStatus("analyzing image " + i + " of " + imageUrls.length);
+          renderStatus("Analyzing image " + i + " of " + imageUrls.length);
           changeImage(imageUrls[i]);
           return analyzeImage(imageUrls[i])
         });
@@ -113,7 +114,6 @@ function runProcess() {
     }
 
     promise.then(function(results) {
-      console.log("analysis done"); 
       updateResults(results);
       renderResults();
       changeImage("");
@@ -121,6 +121,8 @@ function runProcess() {
       if(response.nextPageLink) {
         renderStatus("Next page...");
         chrome.tabs.sendMessage(tabId, { command: "goto", href: response.nextPageLink });
+      } else {
+        renderStatus("Done.");        
       }
     }); 
   });
