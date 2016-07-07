@@ -9,13 +9,22 @@
     <title>LinkedIn Diversity Check</title>
     <style>
       body {
-        font-family: "Segoe UI", "Lucida Grande", Tahoma, sans-serif;
+        font-family: "Garamond", Tahoma, sans-serif;
         font-size: 100%;
       }
 
       h1 {
+        font-size: x-large;
+      }
+
+      h2 {
         font-size: large;
       }
+
+      .warning {
+        color: orange;
+      }
+
       #status {
         white-space: pre;
         width: 400px;
@@ -35,6 +44,13 @@
   </head>
   <body>
     <h1>LinkedIn Diversity Check</h1>
+    <h2>Check the diversity of a people search on LinkedIn</h2>
+
+    <button id="start">Start Analysis</button>
+    <button id="stop" disabled>Stop</button>
+
+    <p class="warning">Warning: Faces can be incorrectly categorized.</p>
+
     <div id="status"></div>
     <img id="photo">
     <img id="image-result">

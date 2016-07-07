@@ -70,12 +70,20 @@ var currentResults = {
 
 var tabId = null;
 
+var isRunning = false;
+
 
 function analyzeImage(imageUrl) {
   // Get "full image" from thumbnail URL
   var fullImageUrl = imageUrl.replace("shrink_100_100/", "");
   var faceDetectUrl = "https://apius.faceplusplus.com/v2/detection/detect?api_key=" + API_KEY + "&api_secret=" + API_SECRET + "&url=" + fullImageUrl;
-  return $.getJSON(faceDetectUrl);
+  return $.getJSON(faceDetectUrl).then(function(faceDetectionResults) {
+    updateResults(faceDetectionResults);
+    renderResults();
+    changeImage(imageUrl);
+
+    return { imageUrl: imageUrl, faceDetection: faceDetectionResults };
+  });
 }
 
 function updateResults(results) {
@@ -88,7 +96,16 @@ function updateResults(results) {
 }
 
 function runProcess() {
+  if(!isRunning) return;
+
   chrome.tabs.sendMessage(tabId, { command: "analyze" }, function(response) {
+    if(!response) {
+      renderStatus("Can't find any images. Are you on a LinkedIn people search page?")
+
+      switchRunning(false);
+      return;
+    }
+
     // Remove "ghost" images
     var imageUrls = response.imageUrls.filter(function(url) {
       return url.indexOf("ghost_person") == -1;
@@ -97,25 +114,24 @@ function runProcess() {
     renderStatus("Found " + imageUrls.length + " images");
 
     // Request one at a time
+    renderStatus("Analyzing image " + 1 + " of " + imageUrls.length);
+
     var promise = analyzeImage(imageUrls[0]);
     for(var i = 1; i < imageUrls.length; i++) {
       (function(i) {
         promise = promise.then(function(results) { 
-          updateResults(results);
-          renderResults();
-          renderStatus("Analyzing image " + i + " of " + imageUrls.length);
-          changeImage(imageUrls[i]);
+          if(!isRunning) return;
+
+          renderStatus("Analyzing image " + (i + 1) + " of " + imageUrls.length);
           return analyzeImage(imageUrls[i])
         });
       })(i);
     }
 
     promise.then(function(results) {
-      updateResults(results);
-      renderResults();
       changeImage("");
 
-      if(response.nextPageLink) {
+      if(response.nextPageLink && isRunning) {
         renderStatus("Next page...");
         chrome.tabs.sendMessage(tabId, { command: "goto", href: response.nextPageLink });
       } else {
@@ -125,15 +141,35 @@ function runProcess() {
   });
 }
 
+function switchRunning(val) {
+  isRunning = val;
+
+  $("#start").prop("disabled", val);
+  $("#stop").prop("disabled", !val);
+}
+
 chrome.runtime.onMessage.addListener(function(request) {
   if(request.message == "awoke") {
-    runProcess();
+    if(isRunning) {
+      runProcess();
+    }
   }
 });
 
 chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
   tabId = tabs[0].id;
-
-  runProcess();
 });
+
+$(function() { 
+  $("#start").on("click", function() {
+    switchRunning(true);
+
+    runProcess();
+  });
+
+  $("#stop").on("click", function() {
+    switchRunning(false);
+  });
+});
+
 
