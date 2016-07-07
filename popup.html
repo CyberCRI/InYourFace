@@ -1,9 +1,4 @@
 <!doctype html>
-<!--
- This page is shown when the extension button is clicked, because the
- "browser_action" field in manifest.json contains the "default_popup" key with
- value "popup.html".
- -->
 <html>
   <head>
     <title>LinkedIn Diversity Check</title>
@@ -11,6 +6,8 @@
       body {
         font-family: "Garamond", Tahoma, sans-serif;
         font-size: 100%;
+
+        width: 400px;
       }
 
       h1 {
@@ -26,18 +23,26 @@
       }
 
       #status {
-        white-space: pre;
-        width: 400px;
+        margin-bottom: 10px;
+      }
+
+      #photo {
+        float: left;
+        margin-right: 20px;
+      }
+
+      #chart {
+        width: 75%;
+        margin-left: auto;
+        margin-right: auto;
       }
     </style>
 
-    <!--
-      - JavaScript and HTML must be in separate files: see our Content Security
-      - Policy documentation[1] for details and explanation.
-      -
-      - [1]: https://developer.chrome.com/extensions/contentSecurityPolicy
-     -->
+    <link href="bower_components/c3/c3.css" rel="stylesheet" type="text/css">
+
     <script src="bower_components/jquery/dist/jquery.js"></script>     
+    <script src="bower_components/d3/d3.js" charset="utf-8"></script>
+    <script src="bower_components/c3/c3.js"></script>
     
     <script src="config.js"></script>
     <script src="popup.js"></script>
@@ -46,19 +51,19 @@
     <h1>LinkedIn Diversity Check</h1>
     <h2>Check the diversity of a people search on LinkedIn</h2>
 
+    <p class="warning">Warning: Faces can be incorrectly categorized.</p>
+
     <button id="start">Start Analysis</button>
     <button id="stop" disabled>Stop</button>
 
-    <p class="warning">Warning: Faces can be incorrectly categorized.</p>
-
     <div id="status"></div>
-    <img id="photo">
-    <img id="image-result">
+
     <div>
-      <p><span id="male-count"></span> Men</p>
-      <p><span id="female-count"></span> Women</p>
-      <p><span id="total-count"></span> Total</p>
-    </div>
+      <img id="photo">
+      <p id="photo-caption"></p>
+    </div> 
+
+    <div id="chart"></div>
   </body>
 </html>
 

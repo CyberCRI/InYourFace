@@ -52,14 +52,9 @@ function renderStatus(statusText) {
   document.getElementById('status').textContent = statusText;
 }
 
-function changeImage(url) {
+function changeImage(url, caption) {
   document.getElementById('photo').src = url;
-}
-
-function renderResults() {
-  document.getElementById('male-count').innerText = currentResults.male;
-  document.getElementById('female-count').innerText = currentResults.female;
-  document.getElementById('total-count').innerText = currentResults.total;
+  document.getElementById('photo-caption').textContent = caption;
 }
 
 var currentResults = {
@@ -72,6 +67,12 @@ var tabId = null;
 
 var isRunning = false;
 
+var chart = false;
+
+function interpretResults(results) {
+  if(results.face.length == 0) return "Unknown";
+  else return results.face[0].attribute.gender.value;
+}
 
 function analyzeImage(imageUrl) {
   // Get "full image" from thumbnail URL
@@ -79,8 +80,7 @@ function analyzeImage(imageUrl) {
   var faceDetectUrl = "https://apius.faceplusplus.com/v2/detection/detect?api_key=" + API_KEY + "&api_secret=" + API_SECRET + "&url=" + fullImageUrl;
   return $.getJSON(faceDetectUrl).then(function(faceDetectionResults) {
     updateResults(faceDetectionResults);
-    renderResults();
-    changeImage(imageUrl);
+    changeImage(imageUrl, interpretResults(faceDetectionResults));
 
     return { imageUrl: imageUrl, faceDetection: faceDetectionResults };
   });
@@ -93,6 +93,13 @@ function updateResults(results) {
 
   if(results.face[0].attribute.gender.value == "Male") currentResults.male++;
   else currentResults.female++;
+
+  chart.load({
+   columns: [
+      ['Male', currentResults.male],
+      ['Female', currentResults.female]
+    ]
+  });
 }
 
 function runProcess() {
@@ -169,6 +176,24 @@ $(function() {
 
   $("#stop").on("click", function() {
     switchRunning(false);
+  });
+
+  chart = c3.generate({
+    bindto: '#chart',
+    data: {
+      type: 'pie',
+      columns: [
+        ['Male', 0],
+        ['Female', 0]
+      ]
+    },
+    pie: {
+      label: {
+        format: function (value, ratio, id) {
+          return value + " (" + Math.floor(ratio * 100) + "%)" ; // d3.format('$')(value);
+        }
+      }
+    }
   });
 });
 
