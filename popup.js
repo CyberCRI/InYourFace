@@ -57,17 +57,33 @@ function changeImage(url, caption) {
   $("#photo-caption").html(caption);
 }
 
+var CHARTS = ["gender", "race", "age", "glasses"];
+
 var currentResults = {
-  male: 0,
-  female: 0,
-  total: 0
+  gender: {
+    Male: 0,
+    Female: 0
+  },
+  race: { },
+  glasses: {
+    Yes: 0,
+    No: 0
+  },
+  age: {
+    "Below 20": 0,
+    "20s": 0,
+    "30s": 0,
+    "40s": 0,
+    "50s": 0,
+    "60 and up": 0
+  }
 };
 
 var tabId = null;
 
 var isRunning = false;
 
-var chart = false;
+var charts = {};
 
 function interpretResults(results) {
   if(results.face.length == 0) return null;
@@ -93,28 +109,41 @@ function analyzeImage(imageUrl) {
   var fullImageUrl = imageUrl.replace("shrink_100_100/", "");
   var faceDetectUrl = "https://apius.faceplusplus.com/v2/detection/detect?api_key=" + API_KEY + "&api_secret=" + API_SECRET + "&url=" + fullImageUrl + "&attribute=glass,gender,age,race,smiling";
   return $.getJSON(faceDetectUrl).then(function(faceDetectionResults) {
-    updateResults(faceDetectionResults);
-
     var interpretedResults = interpretResults(faceDetectionResults);
+
     changeImage(imageUrl, makeResultsHtml(interpretedResults));
+    updateResults(interpretedResults);
+    updateCharts();
 
     return { imageUrl: imageUrl, faceDetection: faceDetectionResults };
   });
 }
 
-function updateResults(results) {
-  currentResults.total++;
+function updateResults(interpretedResults) {
+  if(!interpretedResults) return;
 
-  if(results.face.length == 0) return;
+  if(interpretedResults.gender == "Male") currentResults.gender.Male++;
+  else currentResults.gender.Female++;
 
-  if(results.face[0].attribute.gender.value == "Male") currentResults.male++;
-  else currentResults.female++;
+  if(currentResults.race[interpretedResults.race]) currentResults.race[interpretedResults.race]++;
+  else currentResults.race[interpretedResults.race] = 1;
 
-  chart.load({
-   columns: [
-      ['Male', currentResults.male],
-      ['Female', currentResults.female]
-    ]
+  if(interpretedResults.glasses) currentResults.glasses.Yes++;
+  else currentResults.glasses.No++;
+
+  if(interpretedResults.age.value < 20) currentResults.age["Below 20"]++;
+  else if(interpretedResults.age.value < 30) currentResults.age["20s"]++;
+  else if(interpretedResults.age.value < 40) currentResults.age["30s"]++;
+  else if(interpretedResults.age.value < 50) currentResults.age["40s"]++;
+  else if(interpretedResults.age.value < 60) currentResults.age["50s"]++;
+  else currentResults.age["60 and up"]++;
+}
+
+function updateCharts() {
+  CHARTS.forEach(function(chartName) {
+    charts[chartName].load({
+      columns: _.pairs(currentResults[chartName])
+    });
   });
 }
 
@@ -152,7 +181,7 @@ function runProcess() {
     }
 
     promise.then(function(results) {
-      changeImage("");
+      changeImage("", "");
 
       if(response.nextPageLink && isRunning) {
         renderStatus("Next page...");
@@ -194,22 +223,20 @@ $(function() {
     switchRunning(false);
   });
 
-  chart = c3.generate({
-    bindto: '#chart',
-    data: {
-      type: 'pie',
-      columns: [
-        ['Male', 0],
-        ['Female', 0]
-      ]
-    },
-    pie: {
-      label: {
-        format: function (value, ratio, id) {
-          return value + " (" + Math.floor(ratio * 100) + "%)" ; // d3.format('$')(value);
-        }
+  CHARTS.forEach(function(chartName) {
+    charts[chartName] = c3.generate({
+      bindto: "#" + chartName + "-chart",
+      size: {
+        width: 200
+      },
+      data: {
+        type: 'donut',
+        columns: []
+      },
+      donut: {
+        title: chartName[0].toUpperCase() + chartName.slice(1) // uppercase the first letter
       }
-    }
+    });
   });
 });
 
