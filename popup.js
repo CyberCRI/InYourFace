@@ -54,7 +54,7 @@ function renderStatus(statusText) {
 
 function changeImage(url, caption) {
   document.getElementById('photo').src = url;
-  document.getElementById('photo-caption').textContent = caption;
+  $("#photo-caption").html(caption);
 }
 
 var currentResults = {
@@ -70,17 +70,33 @@ var isRunning = false;
 var chart = false;
 
 function interpretResults(results) {
-  if(results.face.length == 0) return "Unknown";
-  else return results.face[0].attribute.gender.value;
+  if(results.face.length == 0) return null;
+  else return {
+    gender: results.face[0].attribute.gender.value,
+    race: results.face[0].attribute.race.value,
+    glasses: results.face[0].attribute.glass.value != "None",
+    age: results.face[0].attribute.age // include value and range
+  };
+}
+
+function makeResultsHtml(interpretedResults) {
+  if(!interpretedResults) return "Analysis failed";
+
+  return "Gender: " + interpretedResults.gender + "<br>" 
+    + "Race: " + interpretedResults.race + "<br>"
+    + "Glasses: " + (interpretedResults.glasses ? "Yes" : "No") + "<br>"
+    + "Age: " + interpretedResults.age.value + " ± " + (interpretedResults.age.range / 2) + " years old";  
 }
 
 function analyzeImage(imageUrl) {
   // Get "full image" from thumbnail URL
   var fullImageUrl = imageUrl.replace("shrink_100_100/", "");
-  var faceDetectUrl = "https://apius.faceplusplus.com/v2/detection/detect?api_key=" + API_KEY + "&api_secret=" + API_SECRET + "&url=" + fullImageUrl;
+  var faceDetectUrl = "https://apius.faceplusplus.com/v2/detection/detect?api_key=" + API_KEY + "&api_secret=" + API_SECRET + "&url=" + fullImageUrl + "&attribute=glass,gender,age,race,smiling";
   return $.getJSON(faceDetectUrl).then(function(faceDetectionResults) {
     updateResults(faceDetectionResults);
-    changeImage(imageUrl, interpretResults(faceDetectionResults));
+
+    var interpretedResults = interpretResults(faceDetectionResults);
+    changeImage(imageUrl, makeResultsHtml(interpretedResults));
 
     return { imageUrl: imageUrl, faceDetection: faceDetectionResults };
   });
