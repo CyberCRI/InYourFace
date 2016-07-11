@@ -120,6 +120,9 @@ function makeResultsHtml(interpretedResults) {
       case "age":
         resultsHtml += "Age: " + interpretedResults.age.value + " ± " + (interpretedResults.age.range / 2) + " years old";
         break;
+      case "glasses":
+        resultsHtml += "Glasses: " + (interpretedResults.glasses ? "Yes" : "No");
+        break;
       case "smiling":
         resultsHtml += "Smiling: " + (interpretedResults.smiling ? "Yes" : "No");
         break;
