@@ -10,6 +10,10 @@ var currentResults = {
     Yes: 0,
     No: 0
   },
+  smiling: {
+    Yes: 0,
+    No: 0
+  },
   age: {
     "Below 20": 0,
     "20s": 0,
@@ -91,17 +95,35 @@ function interpretResults(results) {
     gender: results.face[0].attribute.gender.value,
     race: results.face[0].attribute.race.value,
     glasses: results.face[0].attribute.glass.value != "None",
-    age: results.face[0].attribute.age // include value and range
+    age: results.face[0].attribute.age, // include value and range
+    smiling: results.face[0].attribute.smiling.value > 50
   };
 }
 
 function makeResultsHtml(interpretedResults) {
   if(!interpretedResults) return "Analysis failed";
 
-  return "Gender: " + interpretedResults.gender + "<br>" 
-    + "Race: " + interpretedResults.race + "<br>"
-    + "Glasses: " + (interpretedResults.glasses ? "Yes" : "No") + "<br>"
-    + "Age: " + interpretedResults.age.value + " ± " + (interpretedResults.age.range / 2) + " years old";  
+  var resultsHtml = "";
+  CONFIG.CHARTS.forEach(function(chartName) {
+    switch(chartName) {
+      case "gender":
+        resultsHtml += "Gender: " + interpretedResults.gender;
+        break;
+      case "race":
+        resultsHtml += "Race: " + interpretedResults.race;
+        break;
+      case "age":
+        resultsHtml += "Age: " + interpretedResults.age.value + " ± " + (interpretedResults.age.range / 2) + " years old";
+        break;
+      case "smiling":
+        resultsHtml += "Smiling: " + (interpretedResults.smiling ? "Yes" : "No");
+        break;
+    }
+
+    resultsHtml += "<br>";
+  });
+
+  return resultsHtml;
 }
 
 function analyzeImage(imageUrl) {
@@ -137,6 +159,9 @@ function updateResults(interpretedResults) {
   else if(interpretedResults.age.value < 50) currentResults.age["40s"]++;
   else if(interpretedResults.age.value < 60) currentResults.age["50s"]++;
   else currentResults.age["60 and up"]++;
+
+  if(interpretedResults.smiling) currentResults.smiling.Yes++;
+  else currentResults.smiling.No++;
 }
 
 function updateCharts() {
