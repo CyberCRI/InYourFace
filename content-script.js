@@ -1,4 +1,4 @@
-console.log("Content script loaded");
+//console.log("Content script loaded");
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   console.log("Got command", request.command);
@@ -17,10 +17,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       var imageUrl = resultLinks[i].childNodes[0].src;
       imageUrls.push(imageUrl);
 
-      // TODO: convert URL to get rid of shrink
-      // TODO: ignore "ghosts"
-
-      console.log("image url", imageUrl);
+      //console.log("image url", imageUrl);
     }
 
     sendResponse({ imageUrls: imageUrls, nextPageLink: nextPageLink });
@@ -28,4 +25,4 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 });
 
 chrome.runtime.sendMessage({ message: "awoke" });
-console.log("Send awoke message");
+//console.log("Send awoke message");

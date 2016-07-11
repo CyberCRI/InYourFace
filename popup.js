@@ -24,6 +24,11 @@ var currentResults = {
   }
 };
 
+var counters = {
+  success: 0,
+  total: 0
+};
+
 var tabId = null;
 
 var isRunning = false;
@@ -142,7 +147,11 @@ function analyzeImage(imageUrl) {
 }
 
 function updateResults(interpretedResults) {
+  counters.total++;
+
   if(!interpretedResults) return;
+
+  counters.success++;
 
   if(interpretedResults.gender == "Male") currentResults.gender.Male++;
   else currentResults.gender.Female++;
@@ -170,6 +179,9 @@ function updateCharts() {
       columns: _.pairs(currentResults[chartName])
     });
   });
+
+  var percent = Math.floor(100 * counters.success / counters.total);
+  $("#analysis-summary").text("Analyzed " + counters.success + " photos out of " + counters.total + " profiles (" + percent + "%).");
 }
 
 function runProcess() {
@@ -187,6 +199,9 @@ function runProcess() {
     var imageUrls = response.imageUrls.filter(function(url) {
       return url.indexOf("ghost_person") == -1;
     });
+
+    // Count skipped photos
+    counters.total += response.imageUrls.length - imageUrls.length;
 
     renderStatus("Found " + imageUrls.length + " images");
 
