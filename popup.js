@@ -1,6 +1,33 @@
-// Copyright (c) 2014 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// *** Globals
+
+var currentResults = {
+  gender: {
+    Male: 0,
+    Female: 0
+  },
+  race: { },
+  glasses: {
+    Yes: 0,
+    No: 0
+  },
+  age: {
+    "Below 20": 0,
+    "20s": 0,
+    "30s": 0,
+    "40s": 0,
+    "50s": 0,
+    "60 and up": 0
+  }
+};
+
+var tabId = null;
+
+var isRunning = false;
+
+var charts = {};
+
+
+// *** Functions
 
 /**
  * Get the current URL.
@@ -57,33 +84,6 @@ function changeImage(url, caption) {
   $("#photo-caption").html(caption);
 }
 
-var CHARTS = ["gender", "race", "age", "glasses"];
-
-var currentResults = {
-  gender: {
-    Male: 0,
-    Female: 0
-  },
-  race: { },
-  glasses: {
-    Yes: 0,
-    No: 0
-  },
-  age: {
-    "Below 20": 0,
-    "20s": 0,
-    "30s": 0,
-    "40s": 0,
-    "50s": 0,
-    "60 and up": 0
-  }
-};
-
-var tabId = null;
-
-var isRunning = false;
-
-var charts = {};
 
 function interpretResults(results) {
   if(results.face.length == 0) return null;
@@ -107,7 +107,7 @@ function makeResultsHtml(interpretedResults) {
 function analyzeImage(imageUrl) {
   // Get "full image" from thumbnail URL
   var fullImageUrl = imageUrl.replace("shrink_100_100/", "");
-  var faceDetectUrl = "https://apius.faceplusplus.com/v2/detection/detect?api_key=" + API_KEY + "&api_secret=" + API_SECRET + "&url=" + fullImageUrl + "&attribute=glass,gender,age,race,smiling";
+  var faceDetectUrl = "https://apius.faceplusplus.com/v2/detection/detect?api_key=" + CONFIG.API_KEY + "&api_secret=" + CONFIG.API_SECRET + "&url=" + fullImageUrl + "&attribute=glass,gender,age,race,smiling";
   return $.getJSON(faceDetectUrl).then(function(faceDetectionResults) {
     var interpretedResults = interpretResults(faceDetectionResults);
 
@@ -140,7 +140,7 @@ function updateResults(interpretedResults) {
 }
 
 function updateCharts() {
-  CHARTS.forEach(function(chartName) {
+  CONFIG.CHARTS.forEach(function(chartName) {
     charts[chartName].load({
       columns: _.pairs(currentResults[chartName])
     });
@@ -200,6 +200,9 @@ function switchRunning(val) {
   $("#stop").prop("disabled", !val);
 }
 
+
+// *** Script
+
 chrome.runtime.onMessage.addListener(function(request) {
   if(request.message == "awoke") {
     if(isRunning) {
@@ -223,7 +226,9 @@ $(function() {
     switchRunning(false);
   });
 
-  CHARTS.forEach(function(chartName) {
+  CONFIG.CHARTS.forEach(function(chartName) {
+    $("<div class='chart' id='" + chartName + "-chart'></div>").appendTo($("#chart-container"));
+
     charts[chartName] = c3.generate({
       bindto: "#" + chartName + "-chart",
       size: {
