@@ -93,15 +93,28 @@ function analyzeImage(imageUrl) {
   // Get "full image" from thumbnail URL
   var fullImageUrl = imageUrl.replace("shrink_100_100/", "");
   var faceDetectUrl = "https://apius.faceplusplus.com/v2/detection/detect?api_key=" + CONFIG.API_KEY + "&api_secret=" + CONFIG.API_SECRET + "&url=" + fullImageUrl + "&attribute=glass,gender,age,race,smiling";
-  return $.getJSON(faceDetectUrl).then(function(faceDetectionResults) {
+  
+  var deferred = $.Deferred();
+  $.getJSON(faceDetectUrl).done(function(faceDetectionResults) {
     var interpretedResults = interpretResults(faceDetectionResults);
 
     changeImage(imageUrl, makeResultsHtml(interpretedResults));
     updateResults(interpretedResults);
     updateCharts();
 
-    return { imageUrl: imageUrl, faceDetection: faceDetectionResults };
+    deferred.resolve({ imageUrl: imageUrl, faceDetection: faceDetectionResults });
+  }).fail(function() {
+    // Something went wrong, skip it...
+    // TODO: handle concurreny errors through retry
+
+    changeImage(imageUrl, makeResultsHtml(null));
+    updateResults(null);
+    updateCharts();
+
+    deferred.resolve({ imageUrl: imageUrl, faceDetection: null });
   });
+
+  return deferred.promise();
 }
 
 function updateResults(interpretedResults) {
@@ -169,7 +182,7 @@ function runProcess() {
     var promise = analyzeImage(imageUrls[0]);
     for(var i = 1; i < imageUrls.length; i++) {
       (function(i) {
-        promise = promise.then(function(results) { 
+        promise = promise.then(function() { 
           if(!isRunning) return;
 
           renderStatus("Analyzing image " + (i + 1) + " of " + imageUrls.length);
@@ -178,7 +191,7 @@ function runProcess() {
       })(i);
     }
 
-    promise.then(function(results) {
+    promise.then(function() {
       changeImage("", "");
 
       if(response.nextPageLink && isRunning) {
