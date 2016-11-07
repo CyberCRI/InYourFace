@@ -92,7 +92,7 @@ function makeResultsHtml(interpretedResults) {
 function analyzeImage(imageUrl) {
   // Get "full image" from thumbnail URL
   var fullImageUrl = imageUrl.replace("shrink_100_100/", "");
-  var faceDetectUrl = "https://apius.faceplusplus.com/v2/detection/detect?api_key=" + CONFIG.API_KEY + "&api_secret=" + CONFIG.API_SECRET + "&url=" + fullImageUrl + "&attribute=glass,gender,age,race,smiling";
+  var faceDetectUrl = "https://apius.faceplusplus.com/v2/detection/detect?api_key=" + CONFIG.FACEPP_API_KEY + "&api_secret=" + CONFIG.FACEPP_API_SECRET + "&url=" + fullImageUrl + "&attribute=glass,gender,age,race,smiling";
   
   var deferred = $.Deferred();
   $.getJSON(faceDetectUrl).done(function(faceDetectionResults) {

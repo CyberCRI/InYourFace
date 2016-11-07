@@ -1,0 +1,16 @@
+{
+  "name": "InYourFace",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "dependencies": {},
+  "devDependencies": {
+    "chokidar-cli": "^1.2.0"
+  },
+  "scripts": {
+    "watch": "chokidar '**/*.elm' -c 'elm make main.elm --output public/main.js' --initial",
+    "build": "elm make main.elm --output public/main.js"
+  },
+  "author": "",
+  "license": "MIT"
+}
