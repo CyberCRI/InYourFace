@@ -32,7 +32,7 @@ var counters = {
 // Decode tabId from URL
 var tabId = parseInt(window.location.search.match(/tabId=(\d+)/)[1]);
 
-var isRunning = false;
+var status = "ready"; // values: "ready", "analyzing", "doneAnalyzing", "published", "cancelled"
 
 var charts = {};
 
@@ -156,7 +156,7 @@ function updateCharts() {
 }
 
 function runProcess() {
-  if(!isRunning) return;
+  if(status != "analyzing") return;
 
   chrome.tabs.sendMessage(tabId, { command: "analyze" }, function(response) {
     if(!response) {
@@ -183,7 +183,7 @@ function runProcess() {
     for(var i = 1; i < imageUrls.length; i++) {
       (function(i) {
         promise = promise.then(function() { 
-          if(!isRunning) return;
+          if(status != "analyzing") return;
 
           renderStatus("Analyzing image " + (i + 1) + " of " + imageUrls.length);
           return analyzeImage(imageUrls[i])
@@ -194,7 +194,7 @@ function runProcess() {
     promise.then(function() {
       changeImage("", "");
 
-      if(response.nextPageLink && isRunning) {
+      if(response.nextPageLink && status == "analyzing") {
         renderStatus("Next page...");
         chrome.tabs.sendMessage(tabId, { command: "goto", href: response.nextPageLink });
       } else {
@@ -204,11 +204,24 @@ function runProcess() {
   });
 }
 
-function switchRunning(val) {
-  isRunning = val;
+function switchStatus(newStatus) {
+  status = newStatus;
 
-  $("#start").prop("disabled", val);
-  $("#stop").prop("disabled", !val);
+  $("#start").hide();
+  $("#stop").hide();
+  $("#feedback-container").hide();
+  $("#feedback-thanks").hide();
+  $("#chart-container").hide();
+  $("#cancelled-text").hide();
+
+  if(status == "ready") $("#start").show();    
+  else if(status == "analyzing") {
+    $("#stop").show();
+    $("#chart-container").show();
+  }    
+  else if(status == "doneAnalyzing") $("#feedback-container").show();    
+  else if(status == "published") $("#feedback-thanks").show();    
+  else if(status == "cancelled") $("#cancelled-text").show();    
 }
 
 
@@ -225,14 +238,16 @@ chrome.runtime.onMessage.addListener(function(request) {
 
 $(function() { 
   $("#start").on("click", function() {
-    switchRunning(true);
+    switchStatus("analyzing");
 
     runProcess();
   });
 
   $("#stop").on("click", function() {
-    switchRunning(false);
+    switchStatus("cancelled");
   });
+
+  switchStatus("ready");
 
   CONFIG.CHARTS.forEach(function(chartName) {
     $("<div class='chart' id='" + chartName + "-chart'></div>").appendTo($("#chart-container"));

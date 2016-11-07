@@ -45,7 +45,10 @@ Requires Elm.
 
 ### To Develop
 
-`elm make main.elm --output main.js`
+```
+cd website
+elm make main.elm --output main.js
+``
 
 or, if you have NPM installed:
 
