@@ -162,7 +162,7 @@ function runProcess() {
     if(!response) {
       renderStatus("Can't find any images. Are you on a LinkedIn people search page?")
 
-      switchRunning(false);
+      switchStatus("ready");
       return;
     }
 
@@ -198,7 +198,8 @@ function runProcess() {
         renderStatus("Next page...");
         chrome.tabs.sendMessage(tabId, { command: "goto", href: response.nextPageLink });
       } else {
-        renderStatus("Done.");        
+        renderStatus("Done."); 
+        switchStatus("doneAnalyzing"); 
       }
     }); 
   });
@@ -214,14 +215,51 @@ function switchStatus(newStatus) {
   $("#chart-container").hide();
   $("#cancelled-text").hide();
 
-  if(status == "ready") $("#start").show();    
-  else if(status == "analyzing") {
-    $("#stop").show();
-    $("#chart-container").show();
-  }    
-  else if(status == "doneAnalyzing") $("#feedback-container").show();    
-  else if(status == "published") $("#feedback-thanks").show();    
-  else if(status == "cancelled") $("#cancelled-text").show();    
+  switch(status) {
+    case "ready":
+      $("#start").show();
+      break;
+
+    case "analyzing":
+      $("#stop").show();
+      $("#chart-container").show();
+      break;
+
+    case "doneAnalyzing":
+      $("#feedback-container").show();
+      break;
+
+    case "published":
+      $("#feedback-thanks").show();
+      break;
+
+    case "cancelled":
+      $("#cancelled-text").show(); 
+      break;
+
+    default:
+      throw Error("Unknown status '" + status + "'");
+  }   
+}
+
+function sendRedmetricsData(name, message) {
+  // Send results to RedMetrics
+  return redmetrics.connect({ 
+    baseUrl: CONFIG.RM_HOST,
+    gameVersionId: CONFIG.RM_GAME_VERSION,
+    bufferingDelay: 10
+  }).then(function() {
+    return redmetrics.postEvent({
+      type: "results",
+      customData: {
+        name: name,
+        message: message,
+        results: currentResults
+      }
+    });
+  }).then(function() {
+    return redmetrics.disconnect();
+  });
 }
 
 
@@ -239,6 +277,7 @@ chrome.runtime.onMessage.addListener(function(request) {
 $(function() { 
   $("#start").on("click", function() {
     switchStatus("analyzing");
+    renderStatus("");
 
     runProcess();
   });
@@ -246,6 +285,15 @@ $(function() {
   $("#stop").on("click", function() {
     switchStatus("cancelled");
   });
+
+  $("#feedback-thanks").on("click", function() {
+    $("#feedback-thanks").prop("disabled", true);
+    sendRedmetricsData($("#feedback-name").val(), $("#feedback-description").val()).then(function() {
+      switchStatus("Published");
+
+      switchStatus("published");
+    });
+  })
 
   switchStatus("ready");
 
