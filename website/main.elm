@@ -14,14 +14,15 @@ import String
 main =
   App.programWithFlags { init = init, view = view, subscriptions = subscriptions, update = update }
 
-
 -- Functions
 
-getSessionStats : String -> Cmd Msg
-getSessionStats playerId =
+getSessionStats : Cmd Msg
+getSessionStats =
   let
+    urlBase = "http://localhost:5050/v1/event?gameVersion=bc02efcb-a95c-433d-bbc9-c2aa83f795c4"
     url =
-      "https://api.redmetrics.io/v1/event?game=67475d78-09af-4f23-95fa-45a700f08057&type=statistics&player=" ++ playerId
+      -- urlBase ++ "&type=results&player=" ++ playerId
+      urlBase ++ "&type=results"
   in
     Task.perform FetchFail FetchSucceed (Http.get decodeStatistics url)
 
@@ -57,16 +58,23 @@ getPlayerId path =
 
 type alias Statistics =
   {
-    foundShapeCount : Int
-  , newShapeCount: Int
-  , categoryCount: Int
-  , meanCreated: Int
-  , beautifulPercent: Int
-  , foundPopularShape: Bool
-  , searchScore: Float
-  , searchScorePercent: Int
-  , searchStyle: String
-  , searchResults: String
+    name: String
+  , message: String
+  , results: 
+    {
+      
+
+    }
+  --  foundShapeCount : Int
+  --, newShapeCount: Int
+  --, categoryCount: Int
+  --, meanCreated: Int
+  --, beautifulPercent: Int
+  --, foundPopularShape: Bool
+  --, searchScore: Float
+  --, searchScorePercent: Int
+  --, searchStyle: String
+  --, searchResults: String
   }
 
 type StatisticsOwnership = Yes Statistics | No | Looking 
@@ -79,15 +87,16 @@ type alias Model =
 
 init : { path: Maybe String } -> (Model, Cmd Msg)
 init flags = 
-  case flags.path of
-    Just path -> 
-      let 
-        playerId = getPlayerId path
-      in 
-        case playerId of
-          Just playerId -> ({ playerId = Just playerId, statistics = Looking }, getSessionStats playerId)
-          Nothing -> ({ playerId = Nothing, statistics = No }, Cmd.none)
-    Nothing -> ({ playerId = Nothing, statistics = No }, Cmd.none)
+  --case flags.path of
+  --  Just path -> 
+  --    let 
+  --      playerId = getPlayerId path
+  --    in 
+  --      case playerId of
+  --        Just playerId -> ({ playerId = Just playerId, statistics = Looking }, getSessionStats playerId)
+  --        Nothing -> ({ playerId = Nothing, statistics = No }, Cmd.none)
+  --  Nothing -> ({ playerId = Nothing, statistics = No }, Cmd.none)
+  ({ playerId = Nothing, statistics = Looking }, getSessionStats)
 
 -- Temporarily fake data without internet connection
 --init flags = 

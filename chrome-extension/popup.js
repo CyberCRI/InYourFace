@@ -254,7 +254,8 @@ function sendRedmetricsData(name, message) {
       customData: {
         name: name,
         message: message,
-        results: currentResults
+        results: currentResults,
+        counters: counters
       }
     });
   }).then(function() {
