@@ -63,3 +63,7 @@ button {
 #feedback-container > div {
 	margin-top: 10px;
 }
+
+.hidden {
+  display: none;
+}

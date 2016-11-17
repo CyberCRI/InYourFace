@@ -102,6 +102,23 @@ function analyzeImage(imageUrl) {
     updateResults(interpretedResults);
     updateCharts();
 
+    if(CONFIG.LOGGING) {
+      if(interpretedResults) {
+        $("#log").append("<tr>"
+          + "<td>" + imageUrl + "</td>"
+          + "<td>true</td>"
+          + "<td>" + interpretedResults.gender + "<td>"
+          + "<td>" + interpretedResults.glasses + "</td>"
+          + "<td>" + interpretedResults.smiling + "</td>"
+          + "</tr>");
+      } else {
+        $("#log").append("<tr>"
+          + "<td>" + imageUrl + "</td>"
+          + "<td>false</td>"
+          + "</tr>");
+      }
+    }
+
     deferred.resolve({ imageUrl: imageUrl, faceDetection: faceDetectionResults });
   }).fail(function() {
     // Something went wrong, skip it...
@@ -110,6 +127,13 @@ function analyzeImage(imageUrl) {
     changeImage(imageUrl, makeResultsHtml(null));
     updateResults(null);
     updateCharts();
+
+    if(CONFIG.LOGGING) {
+      $("#log").append("<tr>"
+        + "<td>" + imageUrl + "</td>"
+        + "<td>false</td>"
+        + "</tr>");
+    }
 
     deferred.resolve({ imageUrl: imageUrl, faceDetection: null });
   });
@@ -268,7 +292,7 @@ function sendRedmetricsData(name, message) {
 
 chrome.runtime.onMessage.addListener(function(request) {
   if(request.message == "awoke") {
-    if(isRunning) {
+    if(status == "analyzing") {
       runProcess();
     }
   }
@@ -295,6 +319,11 @@ $(function() {
       switchStatus("published");
     });
   })
+
+  if(CONFIG.LOGGING) {
+    $("#log").show();
+  }
+
 
   switchStatus("ready");
 
