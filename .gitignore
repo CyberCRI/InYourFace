@@ -3,7 +3,7 @@
 chrome-extension/bower_components/
 chrome-extension/config.js
 
-website/elm-stuff/
-website/node_modules/
-website/public/main.js
+website/resources/public/js/compiled
+website/target/
 website/nginx.conf
+website/figwheel_server.log

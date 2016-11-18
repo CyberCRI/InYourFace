@@ -40,24 +40,32 @@ If you make changes to the code, don't forget to reload the extension (in the ex
 
 ### Website
 
-Requires Elm.
+Requires ClojureScript.
 
 
 ### To Develop
 
-```
-cd website
-elm make main.elm --output main.js
-``
+To get an interactive development environment run:
 
-or, if you have NPM installed:
+    lein figwheel
 
-`npm run build` to build once, and `npm run watch` to watch for changes.
+and open your browser at [localhost:3449](http://localhost:3449/).
+
+To clean all compiled files:
+
+    lein clean
+
+To create a production build run:
+
+    lein do clean, cljsbuild once min
+
+And open your browser in `resources/public/index.html`. You will not
+get live reloading, nor a REPL. 
 
 
 ### To Run
 
-Use a web server such as nginx to redirect requests to `website/public/index.html`. An example nginx config file is included in this repository. 
+Use a web server such as nginx to redirect requests to `website/public/resources/index.html`. An example nginx config file is included in this repository. 
 
 
 ## Thanks 
