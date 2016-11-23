@@ -286,7 +286,10 @@ function sendRedmetricsData(name, message) {
       }
     });
   }).then(function() {
-    return redmetrics.disconnect();
+    var resultsId = redmetrics.playerId;
+    return redmetrics.disconnect().then(function() {
+      return resultsId;
+    });
   });
 }
 
@@ -316,12 +319,16 @@ $(function() {
 
   $("#feedback-submit").on("click", function() {
     $("#feedback-submit").prop("disabled", true);
-    sendRedmetricsData($("#feedback-name").val(), $("#feedback-description").val()).then(function() {
-      switchStatus("Published");
+    sendRedmetricsData($("#feedback-name").val(), $("#feedback-description").val()).then(function(resultsId) {
+      $("#website-results-link").prop("href", CONFIG.SITE_BASE_URL + "/result/" + resultsId);
 
       switchStatus("published");
     });
-  })
+  });
+
+  $("#close").on("click", function() {
+    window.close();
+  });
 
   if(CONFIG.LOGGING) {
     $("#log").show();
