@@ -12,7 +12,8 @@
                   :exclusions [org.clojure/tools.reader]]
                  [rum "0.10.5"]
                  [venantius/accountant "0.1.7"]
-                 [bidi "2.0.14"]]
+                 [bidi "2.0.14"]
+                 [cljsjs/c3 "0.4.11-0"]]
 
   :plugins [[lein-figwheel "0.5.8"]
             [lein-cljsbuild "1.1.4" :exclusions [[org.clojure/clojure]]]]
@@ -33,10 +34,11 @@
                            ;; in the default browser once Figwheel has
                            ;; started and complied your application.
                            ;; Comment this out once it no longer serves you.
-                           :open-urls ["http://localhost:3449/index.html"]}
+                           ;;:open-urls ["http://localhost:3449/index.html"]
+                           }
 
                 :compiler {:main website.core
-                           :asset-path "js/compiled/out"
+                           :asset-path "/js/compiled/out"
                            :output-to "resources/public/js/compiled/website.js"
                            :output-dir "resources/public/js/compiled/out"
                            :source-map-timestamp true

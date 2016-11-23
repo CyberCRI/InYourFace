@@ -250,14 +250,17 @@ function switchStatus(newStatus) {
       break;
 
     case "doneAnalyzing":
+      $("#chart-container").show();
       $("#feedback-container").show();
       break;
 
     case "published":
+      $("#chart-container").show();
       $("#feedback-thanks").show();
       break;
 
     case "cancelled":
+      $("#chart-container").show();
       $("#cancelled-text").show(); 
       break;
 
@@ -311,8 +314,8 @@ $(function() {
     switchStatus("cancelled");
   });
 
-  $("#feedback-thanks").on("click", function() {
-    $("#feedback-thanks").prop("disabled", true);
+  $("#feedback-submit").on("click", function() {
+    $("#feedback-submit").prop("disabled", true);
     sendRedmetricsData($("#feedback-name").val(), $("#feedback-description").val()).then(function() {
       switchStatus("Published");
 
