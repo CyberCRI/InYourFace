@@ -13,7 +13,8 @@
                  [rum "0.10.5"]
                  [venantius/accountant "0.1.7"]
                  [bidi "2.0.14"]
-                 [cljsjs/c3 "0.4.11-0"]]
+                 [cljsjs/c3 "0.4.11-0"]
+                 [cljsjs/moment "2.15.2-3"]]
 
   :plugins [[lein-figwheel "0.5.8"]
             [lein-cljsbuild "1.1.4" :exclusions [[org.clojure/clojure]]]]
