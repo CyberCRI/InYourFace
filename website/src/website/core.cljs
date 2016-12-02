@@ -6,7 +6,11 @@
             [clojure.string :as string]
             [cljs.core.async :refer [<! >! put! chan]]
             [cljsjs.c3]
-            [cljsjs.moment]))
+            [cljsjs.moment]
+            [redmetrics]
+            [_]
+            [Q]
+            [Q.xhr]))
 
 (enable-console-print!)
 
@@ -26,7 +30,7 @@
   (let [promise-chan (chan 1)
         search-options (assoc search-filter "pageNumber" pageNumber)] 
     (-> 
-      (.executeQuery js/redmetrics (clj->js connection-options) (clj->js search-options))
+      (.executeQuery js/redmetrics (clj->js search-options) (clj->js connection-options))
       (.then (fn [result] (put! promise-chan (js->clj result)))))
     promise-chan))
 
@@ -34,7 +38,7 @@
   (let [promise-chan (chan 1)
         search-filter (assoc search-filter "player" result-id)]
     (-> 
-      (.executeQuery js/redmetrics (clj->js connection-options) (clj->js search-filter))
+      (.executeQuery js/redmetrics (clj->js search-filter) (clj->js connection-options))
       (.then (fn [result] (put! promise-chan (-> (js->clj result) 
                                                  (get "data") 
                                                  first)))))

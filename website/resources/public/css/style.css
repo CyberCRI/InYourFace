@@ -16,7 +16,7 @@ body {
   text-align: left;
 }
 
-th, td {
+table.results th, table.results td {
   border-bottom: 1px solid #ddd;
 }
 

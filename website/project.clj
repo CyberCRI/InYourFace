@@ -45,7 +45,16 @@
                            :source-map-timestamp true
                            ;; To console.log CLJS data-structures make sure you enable devtools in Chrome
                            ;; https://github.com/binaryage/cljs-devtools
-                           :preloads [devtools.preload]}}
+                           :preloads [devtools.preload]
+                           
+                           :foreign-libs [{:file "resources/public/js/deps/RedMetrics.js/redmetrics.js"
+                                           :provides ["redmetrics"]}
+                                          {:file "resources/public/js/deps/underscore/underscore.js"
+                                           :provides ["_"]}
+                                          {:file "resources/public/js/deps/q/q.js"
+                                           :provides ["Q"]}
+                                          {:file "resources/public/js/deps/q-xhr/q-xhr.js"
+                                           :provides ["Q.xhr"]}]}}
                ;; This next build is an compressed minified build for
                ;; production. You can build this with:
                ;; lein cljsbuild once min
@@ -54,7 +63,20 @@
                 :compiler {:output-to "resources/public/js/compiled/website.js"
                            :main website.core
                            :optimizations :advanced
-                           :pretty-print false}}]}
+                           :pretty-print false
+                           
+                           :foreign-libs [{:file "resources/public/js/deps/RedMetrics.js/redmetrics.js"
+                                           :provides ["redmetrics"]}
+                                          {:file "resources/public/js/deps/underscore/underscore.js"
+                                           :provides ["_"]}
+                                          {:file "resources/public/js/deps/q/q.js"
+                                           :provides ["Q"]}
+                                          {:file "resources/public/js/deps/q-xhr/q-xhr.js"
+                                           :provides ["Q.xhr"]}
+                                          ]
+                           :externs ["resources/public/js/externs/redmetrics-extern.js"
+                                     "resources/public/js/externs/underscore-extern.js"
+                                     "resources/public/js/externs/q-extern.js"]}}]}
 
   :figwheel {;; :http-server-root "public" ;; default and assumes "resources"
              ;; :server-port 3449 ;; default
