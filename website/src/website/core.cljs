@@ -4,6 +4,7 @@
             [bidi.bidi :as bidi]
             [accountant.core :as accountant]
             [clojure.string :as string]
+            [cljs.reader :as reader]
             [cljs.core.async :refer [<! >! put! chan]]
             [cljsjs.c3]
             [cljsjs.moment]
@@ -18,13 +19,16 @@
 
 ; (defonce app-state (atom {:text "Hello world!"}))
 
-; TODO : move to config file
-(def connection-options {"baseUrl" "http://localhost:5050"})
+; This comes from config.js 
+(def config (js->clj js/IN_YOUR_FACE_CONFIG))
+
+(def connection-options {"baseUrl" (get config "baseUrl")})
 
 (def search-filter {"entityType" "event" 
-                    "gameVersion" "bc02efcb-a95c-433d-bbc9-c2aa83f795c4"
+                    "gameVersion" (get config "gameVersion")
                     "eventType" "results"
                     "orderBy" "serverTime:desc"})
+
 
 (defn list-results [pageNumber]
   (let [promise-chan (chan 1)
@@ -118,14 +122,16 @@
 
 (rum/defc single-result-short < rum/static [result]
   [:div.single-result-short
-    [:h3 (str "By " (get-in result ["customData" "name"]))]
+    [:h3 
+     [:a {:href (str "/result/" (get result "player"))} (str "By " (get-in result ["customData" "name"]))]]
     [:h4.message (get-in result ["customData" "message"])]
     (let [time (js/moment (get-in result ["serverTime"]))]
       [:p (str "Published " (.fromNow time) " on " (.format time "MMMM Do YYYY, HH:mm") ".")])
     (let [success (get-in result ["customData" "counters" "success"])
           total (get-in result ["customData" "counters" "total"])
           fraction (/ success total)]
-      [:p (str "Analyzed " success " out of " total " photos (" (as-percent fraction) ").")])])
+      [:p (str "Analyzed " success " out of " total " photos (" (as-percent fraction) ").")])
+    [:a {:href (str "/result/" (get result "player"))} "See detailed results..."]])
 
 
 ; Pages
@@ -148,8 +154,7 @@
           [:p (str "Found " (get @results-atom "totalCount") " results")]
           (for [result (get @results-atom "data")]
             [:div 
-              (single-result-short result)
-              [:a {:href (str "/result/" (get result "player"))} "See detailed results..."]])
+              (single-result-short result)])
           [:p
            (when (.hasPreviousPage js/redmetrics @results-atom)
              [:a {:href (str "?page=" (dec (get @results-atom "pageNumber")))} "Previous page"])

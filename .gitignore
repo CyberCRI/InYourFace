@@ -3,6 +3,7 @@
 chrome-extension/bower_components/
 chrome-extension/config.js
 
+website/resources/public/js/config.js
 website/resources/public/js/deps
 website/resources/public/js/compiled
 website/target/
