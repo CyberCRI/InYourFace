@@ -271,12 +271,18 @@ function switchStatus(newStatus) {
 
 function sendRedmetricsData(name, message) {
   // Send results to RedMetrics
-  return redmetrics.connect({ 
+  var connection = redmetrics.prepareWriteConnection({ 
+    baseUrl: CONFIG.RM_HOST,
+    gameVersionId: CONFIG.RM_GAME_VERSION,
+    bufferingDelay: 10
+  });
+
+  return connection.connect({ 
     baseUrl: CONFIG.RM_HOST,
     gameVersionId: CONFIG.RM_GAME_VERSION,
     bufferingDelay: 10
   }).then(function() {
-    return redmetrics.postEvent({
+    return connection.postEvent({
       type: "results",
       customData: {
         name: name,
@@ -286,8 +292,8 @@ function sendRedmetricsData(name, message) {
       }
     });
   }).then(function() {
-    var resultsId = redmetrics.playerId;
-    return redmetrics.disconnect().then(function() {
+    var resultsId = connection.playerId;
+    return connection.disconnect().then(function() {
       return resultsId;
     });
   });
