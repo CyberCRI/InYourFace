@@ -136,7 +136,12 @@
 
 ; Pages
 
-(rum/defc header < rum/static [] [:a {:href "/"} [:h1 "In Your Face"]])
+(rum/defc header < rum/static [] 
+          [:div 
+            [:a {:href "/"} [:h1 "In Your Face"]]
+            [:p "To measure your own social network, and contribute to this site, download our " 
+             [:a {:href "https://chrome.google.com/webstore/detail/in-your-face/cinajdhdcklkhnhakmahohmaanjompjb?authuser=0"} "Chrome browser extension"]
+             "."]])
 
 (rum/defcs home-page < 
            rum/static 
