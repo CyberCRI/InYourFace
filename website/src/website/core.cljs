@@ -143,6 +143,11 @@
              [:a {:href "https://chrome.google.com/webstore/detail/in-your-face/cinajdhdcklkhnhakmahohmaanjompjb?authuser=0"} "Chrome browser extension"]
              "."]])
 
+(rum/defc footer < rum/static [] 
+          [:p "Get more info and source code on "
+            [:a {:href "https://github.com/CyberCRI/InYourFace"} "our GitHub repository"]
+            "."])
+
 (rum/defcs home-page < 
            rum/static 
            (rum/local nil :results)
@@ -165,7 +170,8 @@
              [:a {:href (str "?page=" (dec (get @results-atom "pageNumber")))} "Previous page"])
            [:span " - "]
            (when (.hasNextPage js/redmetrics @results-atom)
-             [:a {:href (str "?page=" (inc (get @results-atom "pageNumber")))} "Next page"])]])])) 
+             [:a {:href (str "?page=" (inc (get @results-atom "pageNumber")))} "Next page"])]])
+      (footer)])) 
     
 (rum/defcs single-result-page < 
            rum/static 
@@ -180,7 +186,8 @@
       (header)
       (if (nil? @result-atom)
         [:h2 "Loading..."]
-        (single-result @result-atom))]))
+        (single-result @result-atom))
+      (footer)]))
 
 (rum/defc error-page []
     [:h1 "Error: no such page"])
