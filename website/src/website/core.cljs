@@ -139,14 +139,21 @@
 (rum/defc header < rum/static [] 
           [:div 
             [:a {:href "/"} [:h1 "In Your Face"]]
+            [:h2 "What faces make up your social network?"]
             [:p "To measure your own social network, and contribute to this site, download our " 
              [:a {:href "https://chrome.google.com/webstore/detail/in-your-face/cinajdhdcklkhnhakmahohmaanjompjb?authuser=0"} "Chrome browser extension"]
              "."]])
 
 (rum/defc footer < rum/static [] 
-          [:p "Get more info and source code on "
-            [:a {:href "https://github.com/CyberCRI/InYourFace"} "our GitHub repository"]
-            "."])
+          [:div
+            [:p 
+             [:a {:href (str "https://twitter.com/intent/tweet?via=IncludoProject&text=What%20faces%20make%20up%20your%20social%20network%3F&url=" 
+                             (-> js/window .-location .-href))
+                  :target "_blank"} 
+                 "Tweet this"]]
+            [:p "Get more info and source code on "
+              [:a {:href "https://github.com/CyberCRI/InYourFace"} "our GitHub repository"]
+              "."]])
 
 (rum/defcs home-page < 
            rum/static 
