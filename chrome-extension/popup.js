@@ -32,9 +32,11 @@ var counters = {
 // Decode tabId from URL
 var tabId = parseInt(window.location.search.match(/tabId=(\d+)/)[1]);
 
-var status = "ready"; // values: "ready", "analyzing", "doneAnalyzing", "published", "cancelled"
+var status = "waking"; // values: "ready", "analyzing", "doneAnalyzing", "published", "cancelled"
 
 var charts = {};
+
+var isAwake = false;
 
 
 // *** Functions
@@ -182,52 +184,50 @@ function updateCharts() {
 function runProcess() {
   if(status != "analyzing") return;
 
-  chrome.tabs.sendMessage(tabId, { command: "analyze" }, function(response) {
-    if(!response) {
-      renderStatus("Can't find any images. Are you on a LinkedIn people search page?")
+  // TODO: detect that no message comes back after timeout and display message
 
-      switchStatus("ready");
-      return;
-    }
-
-    // Remove "ghost" images
-    var imageUrls = response.imageUrls.filter(function(url) {
-      return url.indexOf("ghost_person") == -1;
-    });
-
-    // Count skipped photos
-    counters.total += response.imageUrls.length - imageUrls.length;
-
-    renderStatus("Found " + imageUrls.length + " images");
-
-    // Request one at a time
-    renderStatus("Analyzing image " + 1 + " of " + imageUrls.length);
-
-    var promise = analyzeImage(imageUrls[0]);
-    for(var i = 1; i < imageUrls.length; i++) {
-      (function(i) {
-        promise = promise.then(function() { 
-          if(status != "analyzing") return;
-
-          renderStatus("Analyzing image " + (i + 1) + " of " + imageUrls.length);
-          return analyzeImage(imageUrls[i])
-        });
-      })(i);
-    }
-
-    promise.then(function() {
-      changeImage("", "");
-
-      if(response.nextPageLink && status == "analyzing") {
-        renderStatus("Next page...");
-        chrome.tabs.sendMessage(tabId, { command: "goto", href: response.nextPageLink });
-      } else {
-        renderStatus("Done."); 
-        switchStatus("doneAnalyzing"); 
-      }
-    }); 
-  });
+  chrome.tabs.sendMessage(tabId, { command: "analyze" });
 }
+
+function processImages(imageUrls, hasNextPage) {
+  // Remove "ghost" images
+  var validImageUrls = imageUrls.filter(function(url) {
+    return url != null;
+  });
+
+  // Count skipped photos
+  counters.total += imageUrls.length - validImageUrls.length;
+
+  renderStatus("Found " + validImageUrls.length + " images");
+
+  // Request one at a time
+  renderStatus("Analyzing image " + 1 + " of " + validImageUrls.length);
+
+  var promise = analyzeImage(validImageUrls[0]);
+  for(var i = 1; i < validImageUrls.length; i++) {
+    (function(i) {
+      promise = promise.then(function() { 
+        if(status != "analyzing") return;
+
+        renderStatus("Analyzing image " + (i + 1) + " of " + validImageUrls.length);
+        return analyzeImage(validImageUrls[i])
+      });
+    })(i);
+  }
+
+  promise.then(function() {
+    changeImage("", "");
+
+    if(hasNextPage && status == "analyzing") {
+      renderStatus("Next page...");
+      chrome.tabs.sendMessage(tabId, { command: "gotoNextPage" });
+    } else {
+      renderStatus("Done."); 
+      switchStatus("doneAnalyzing"); 
+    }
+  }); 
+}
+
 
 function switchStatus(newStatus) {
   status = newStatus;
@@ -240,6 +240,9 @@ function switchStatus(newStatus) {
   $("#cancelled-text").hide();
 
   switch(status) {
+    case "waking":
+      break;
+
     case "ready":
       $("#start").show();
       break;
@@ -306,7 +309,15 @@ chrome.runtime.onMessage.addListener(function(request) {
   if(request.message == "awoke") {
     if(status == "analyzing") {
       runProcess();
+    } else if(status == "waking") {
+      isAwake = true;
+      switchStatus("ready");
     }
+  } else if(request.message == "haveLinks") {
+    processImages(request.imageUrls, request.hasNextPage);
+  } else if(request.message == "ping") {
+    isAwake = true;
+    switchStatus("ready");
   }
 });
 
@@ -341,7 +352,7 @@ $(function() {
   }
 
 
-  switchStatus("ready");
+  switchStatus("waking");
 
   CONFIG.CHARTS.forEach(function(chartName) {
     $("<div class='chart' id='" + chartName + "-chart'></div>").appendTo($("#chart-container"));
@@ -360,6 +371,14 @@ $(function() {
       }
     });
   });
+
+  chrome.tabs.sendMessage(tabId, { command: "ping" });
+  setTimeout(function() {
+    if(isAwake) return;
+
+    // Apparently we don't
+    renderStatus("The extension is not responding. Are you on a LinkedIn search page?");
+  }, 3000);
 });
 
 
