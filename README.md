@@ -21,7 +21,7 @@ It's important to note that the face analysis API often makes mistakes on indivi
 
 Go to LinkedIn and search for any company. Look for a bunch of small profile photos on the right, and click on the "See All" link. You can make additional filters on the right.
 
-Alternatively, you can [go directly to the search page](https://www.linkedin.com/vsearch/p) and then filter the results. This way you can also search within your own network.
+Alternatively, you can [go directly to the search page](https://www.linkedin.com/search/results/people/?facetNetwork=%5B%22F%22%5D&origin=FACETED_SEARCH) and then filter the results. This way you can also search within your own network.
 
 Once you have your search done, press the _In Your Face_ icon and the "Start Analysis" button. You should see the photos and analysis results go by. You can press "Stop" at any point.
 

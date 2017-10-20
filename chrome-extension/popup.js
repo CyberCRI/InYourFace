@@ -238,6 +238,7 @@ function switchStatus(newStatus) {
   $("#feedback-thanks").hide();
   $("#chart-container").hide();
   $("#cancelled-text").hide();
+  $("#not-on-linkedin").hide();
 
   switch(status) {
     case "waking":
@@ -265,6 +266,10 @@ function switchStatus(newStatus) {
     case "cancelled":
       $("#chart-container").show();
       $("#cancelled-text").show(); 
+      break;
+
+    case "noResponse":
+      $("#not-on-linkedin").show();
       break;
 
     default:
@@ -347,6 +352,11 @@ $(function() {
     window.close();
   });
 
+
+  $("#goto-linkedin-search-link").on("click", function() {
+    chrome.tabs.update(tabId, { url: "https://www.linkedin.com/search/results/people/?facetNetwork=%5B%22F%22%5D&origin=FACETED_SEARCH" });
+  });
+
   if(CONFIG.LOGGING) {
     $("#log").show();
   }
@@ -377,7 +387,8 @@ $(function() {
     if(isAwake) return;
 
     // Apparently we don't
-    renderStatus("The extension is not responding. Are you on a LinkedIn search page?");
+    switchStatus("noResponse");
+    
   }, 3000);
 });
 
