@@ -17,7 +17,18 @@ _In Your Face_ is a browser extension for Google Chrome. It would be more practi
 It's important to note that the face analysis API often makes mistakes on individual photos. However, we think that for large enough searches, the results should be representative.
 
 
-## Setup
+## How to Use
+
+Go to LinkedIn and search for any company. Look for a bunch of small profile photos on the right, and click on the "See All" link. You can make additional filters on the right.
+
+Alternatively, you can [go directly to the search page](https://www.linkedin.com/vsearch/p) and then filter the results. This way you can also search within your own network.
+
+Once you have your search done, press the _In Your Face_ icon and the "Start Analysis" button. You should see the photos and analysis results go by. You can press "Stop" at any point.
+
+
+## Development
+
+### Chrome Extension
 
 1. Clone the repository.
 2. Install dependencies (`bower install`).
@@ -27,14 +38,33 @@ It's important to note that the face analysis API often makes mistakes on indivi
 
 If you make changes to the code, don't forget to reload the extension (in the extensions tab) as well as reload the LinkedIn page that you are searching on.
 
+### Website
 
-## How to Use
+Requires ClojureScript.
 
-Go to LinkedIn and search for any company. Look for a bunch of small profile photos on the right, and click on the "See All" link. You can make additional filters on the right.
 
-Alternatively, you can [go directly to the search page](https://www.linkedin.com/vsearch/p) and then filter the results. This way you can also search within your own network.
+### To Develop
 
-Once you have your search done, press the _In Your Face_ icon and the "Start Analysis" button. You should see the photos and analysis results go by. You can press "Stop" at any point.
+To get an interactive development environment run:
+
+    lein figwheel
+
+and open your browser at [localhost:3449](http://localhost:3449/).
+
+To clean all compiled files:
+
+    lein clean
+
+To create a production build run:
+
+    lein do clean, cljsbuild once min
+
+And open your browser in `resources/public/index.html`. You will not get live reloading, nor a REPL. 
+
+
+### To Run
+
+Use a web server such as nginx to redirect requests to `website/public/resources/index.html`. An example nginx config file is included in this repository. 
 
 
 ## Thanks 

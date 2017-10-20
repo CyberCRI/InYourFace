@@ -1,0 +1,69 @@
+body {
+  font-family: "Garamond", serif;
+  font-size: 100%;
+
+  width: 500px;
+}
+
+h1 {
+  font-size: x-large;
+}
+
+h2 {
+  font-size: large;
+}
+
+.warning {
+  color: orange;
+  font-size: small;
+}
+
+.error {
+  color: red;
+}
+
+#status {
+  margin: 10px;
+  font-weight: bold;
+}
+
+#photo-container {
+  width: 300px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#photo {
+  float: left;
+  margin-right: 20px;
+}
+
+#chart-container {
+  clear: both
+}
+
+.chart {
+  display: inline-block;
+}
+
+input, textarea {
+	width: 100%;
+
+	font-family: inherit;
+	font-size: large;
+}
+
+button {
+  font-family: inherit;
+  font-size: medium;
+  border-radius: 7px;
+  width: 150px;
+}
+
+#feedback-container > div {
+	margin-top: 10px;
+}
+
+.hidden {
+  display: none;
+}

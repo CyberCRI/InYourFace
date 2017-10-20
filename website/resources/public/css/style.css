@@ -1,0 +1,29 @@
+body {
+  font-family: "Garamond", serif;
+
+  margin: 0 10px 0 10px;
+}
+
+.result-container {
+  display: inline-block;
+  margin: 0 50px 0 50px;
+}
+
+.results {
+  margin-top: 15px;
+
+  width: 100%;
+  text-align: left;
+}
+
+table.results th, table.results td {
+  border-bottom: 1px solid #ddd;
+}
+
+.message {
+  font-style: italic;
+}
+
+.single-result-short {
+  margin-top: 30px;
+}

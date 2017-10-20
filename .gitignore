@@ -1,2 +1,11 @@
-bower_components/
-config.js
+.DS_Store
+
+chrome-extension/bower_components/
+chrome-extension/config.js
+
+website/resources/public/js/config.js
+website/resources/public/js/deps
+website/resources/public/js/compiled
+website/target/
+website/nginx.conf
+website/figwheel_server.log
